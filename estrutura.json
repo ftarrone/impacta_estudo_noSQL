@@ -1,0 +1,31 @@
+   // Estrutura de dados, para criação das Collections
+   
+   
+   {
+    
+        "dt_compra" : 2024-01-01,
+        "id_venda" : 1,
+        "id_cliente" : 1,
+        "nome_cliente" : "Guilherme Masao",
+        "endereco": {
+            "rua" : "Rua Longe Demais",
+            "cidade" : "Itapecirica",
+            "estado" : "Sao Paulo",
+            "cep" : 09231090
+        },
+        "produto" : {
+            "id_produto" : 92,
+            "categoria" : "CD",
+            "nome_produto" : "P.O.D",
+            "preco" : 94.90
+        },
+        "pagamento" : {    
+            "metodo_pagamento" : "cartao",
+            "opcao_pagamento" : "parcelado",
+            "parc_quantidade" : 3
+        }
+        
+    },
+    
+
+    

@@ -1,0 +1,7 @@
+//Qual é a média de produtos comprados por cliente?
+
+db.purchase.aggregate([
+    $group:{
+        
+    }
+])
