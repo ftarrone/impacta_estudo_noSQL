@@ -1,4 +1,4 @@
-   // Estrutura de dados, para criação das Collections
+   // Estrutura de dados, para criação das Collections  db
    
    
    {
@@ -28,4 +28,16 @@
     },
     
 
+    // Collection para descritivo dos produto
+
+    {
+        "id_produto" : 92,
+        "categoria" : "CD",
+        "nome_produto" : "P.O.D",
+        "preco" : 94.90,
+        "descricao" : "Album de Música da banda POD, renomada banda dos anos 90",
+        "fabricado" : 1998,
+        "fabricante" : "Sony Music"
+
     
+},
