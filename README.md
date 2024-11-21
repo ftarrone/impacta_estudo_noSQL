@@ -296,14 +296,14 @@ db.purchase.aggregate([
     {
         $match: {
             dt_compra: { 
-                $gte: new Date(new Date().setDate(new Date().getDate() - 30)) // Filtra vendas nos últimos 30 dias
+                $gte: new Date(new Date().setDate(new Date().getDate() - 30))
             }
         }
     },
     {
         $group: {
-            _id: "$produto.categoria", // Agrupa por categoria de produto
-            total_vendas: { $sum: 1 }  // Conta o total de vendas por categoria
+            _id: "$produto.categoria",
+            total_vendas: { $sum: 1 }
         }
     },
     {
@@ -314,4 +314,5 @@ db.purchase.aggregate([
 ```
 
 >[!Tip]
+>
 >Não funcionou rodando via Shell, caso tente rodar diretamente pela interface ou via node.
