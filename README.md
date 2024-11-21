@@ -1,3 +1,12 @@
+# Grupo Bradesco
+😄😄 Só o trabalho pode produzir riqueza - RISOS 😄😄
+
+### Nomes
+
+- Bianca Santos Carneiro - ``Bia``
+- Fernando Tarrone Molina - ``Nando``
+- Guilherme Masao Tsuyukubo - ``Japa``
+
 ## 1. Fundamentos do MongoDB
 
 ### 1.1 Introdução 
