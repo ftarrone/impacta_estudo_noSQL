@@ -25,6 +25,9 @@ Como o **mongod** é o processo do banco de dados, você pode verificar seu stat
 
 `systemctl status mongod`
 
+> [!IMPORTANT]
+> Lembre-se de sempre ter criado DockerFile, pois sem o file não será instanciado uma imagem nova.
+
 ### 1.4 Topologia
 
 Uma pergunta que você pode ter neste momento é:
@@ -89,10 +92,10 @@ exit
 ```
 
 
-> [!IMPORTANT] Antes de seguir em frente, é importante destacar que essa instância não tem controle de acesso habilitado, o que permite que você se conecte livremente sem nome de usuário e senha. Do ponto de vista da segurança, essa não é uma configuração recomendada para ambientes de produção.
+> [!IMPORTANT]
+> Antes de seguir em frente, é importante destacar que essa instância não tem controle de acesso habilitado, o que permite que você se conecte livremente sem nome de usuário e senha. Do ponto de vista da segurança, essa não é uma configuração recomendada para ambientes de produção.
 
 
-> :warning: Antes de seguir em frente, é importante destacar que essa instância não tem controle de acesso habilitado, o que permite que você se conecte livremente sem nome de usuário e senha. Do ponto de vista da segurança, essa não é uma configuração recomendada para ambientes de produção.
 
 Ótimo! Você usou o shell do MongoDB para se conectar a uma instância MongoDB.
 
@@ -102,9 +105,213 @@ Uma vez conectado, você pode navegar e exibir as estruturas do banco de dados.
 
 1. Os dados para criação das Collections, está especificada no arquivo ```collection_purchase.json```, e ```collection_description_products.json```
 
-> Lembresse de execultar a insert antes das consultas.
+>[!NOTE]
+> Lembre-se de execultar a insert antes das consultas.
 
 > É uma boa prática incluir um identificador único em cada documento quando ele é inserido.
 
 
+### Perguntas a serem respondidas
 
+1. Qual é a média de produtos comprados por cliente?
+
+### Query 1
+
+ ```javascript
+db.purchase.aggregate([
+    {
+      $group: {
+        _id: "$id_cliente",                       
+        nome_cliente: { $first:"$nome_cliente"},
+        media_preco: { $avg: "$produto.preco" }   
+      }
+    }
+  ]);
+  ```
+### Retorno da Query
+
+```javascript
+[
+    { _id: 3100, nome_cliente: 'Edwilson Jacinto', media_preco: 326.08 },
+    { _id: 2, nome_cliente: 'Bianca o Carneiro', media_preco: 919.4625 },
+    { _id: 1200, nome_cliente: 'Fernanda Ferreira Marques', media_preco: 145.575},
+    { _id: 2000,nome_cliente: 'Sueli Resende', media_preco: 423.38571428571424},
+    { _id: 3, nome_cliente: 'Nando Molina', media_preco: 310.31875 },
+    { _id: 1, nome_cliente: 'Guilherme Masao', media_preco: 145.575 },
+    { _id: 120, nome_cliente: 'Josué Marques', media_preco: 145.575 }
+  ]
+
+```
+
+2. Quais são os 20 produtos mais populares por estado dos clientes?
+
+### Query 2
+
+```javascript
+ db.purchase.aggregate([
+    {
+        $group: {
+            _id: {
+                estado: "$endereco.estado", 
+                produto: "$produto.nome_produto"
+            },
+            total_vendas: { $sum: 1 }
+        }
+    },
+    {
+        $sort: { "total_vendas": -1 }
+    },
+    {
+        $group: {
+            _id: "$_id.estado",
+            produtos: {
+                $push: {
+                    nome_produto: "$_id.produto",
+                    total_vendas: "$total_vendas"
+                }
+            }
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            estado: "$_id",
+            produtos: { $slice: ["$produtos", 20] }
+        }
+    }
+])
+```
+
+### Retorno da Query
+
+```javascript
+[
+  {
+    estado: 'Sao Paulo',
+    produtos: [
+      { nome_produto: 'P.O.D', total_vendas: 2 },
+      { nome_produto: 'Senhor dos Anéis', total_vendas: 2 },
+      { nome_produto: 'Tábua de Madeira', total_vendas: 2 },
+      { nome_produto: 'Roube como um Artista', total_vendas: 2 },
+      { nome_produto: 'BDS', total_vendas: 2 },
+      { nome_produto: 'Kate Perry', total_vendas: 2 },
+      { nome_produto: 'Ralador Elétrico', total_vendas: 2 },
+      { nome_produto: 'Air Fryer', total_vendas: 2 }
+    ]
+  },
+  {
+    estado: 'Rio de Janeiro',
+    produtos: [
+      { nome_produto: 'Five Finger Death Punch', total_vendas: 2 },
+      { nome_produto: 'Cafeteira', total_vendas: 2 },
+      { nome_produto: 'Senhor dos Anéis As Duas Torres', total_vendas: 2 },
+      { nome_produto: 'Restart', total_vendas: 2 },
+      { nome_produto: 'Scrum - Como fazer o Dobro do Trabalho na Metado do Tempo', total_vendas: 2 },
+      { nome_produto: 'Churrasqueira Elétrica', total_vendas: 2 },
+      { nome_produto: 'Fresno', total_vendas: 2 },
+      { nome_produto: 'Geladeira', total_vendas: 1 }
+    ]
+  },
+  {
+    estado: 'Bahia',
+    produtos: [
+      { nome_produto: 'Five Finger Death Punch', total_vendas: 1 },
+      { nome_produto: 'Engenheiros do Havaí', total_vendas: 1 },
+      { nome_produto: 'Fogão', total_vendas: 1 },
+      { nome_produto: 'Elba Ramalho', total_vendas: 1 },
+      { nome_produto: 'Senhor dos Anéis - O Retorno do Rei', total_vendas: 1 },
+      { nome_produto: 'Máquina de Chopp', total_vendas: 1 },
+      { nome_produto: 'Data Science Para Negócios', total_vendas: 1 }
+    ]
+  },
+  {
+    estado: 'Curitiba',
+    produtos: [
+      { nome_produto: 'BDS', total_vendas: 1 },
+      { nome_produto: 'P.O.D', total_vendas: 1 },
+      { nome_produto: 'Roube como um Artista', total_vendas: 1 },
+      { nome_produto: 'Tábua de Madeira', total_vendas: 1 },
+      { nome_produto: 'Air Fryer', total_vendas: 1 },
+      { nome_produto: 'Senhor dos Anéis', total_vendas: 1 },
+      { nome_produto: 'Ralador Elétrico', total_vendas: 1 },
+      { nome_produto: 'Kate Perry', total_vendas: 1 }
+    ]
+  },
+  {
+    estado: 'Acre',
+    produtos: [
+      { nome_produto: 'Data Science Para Negócios', total_vendas: 1 },
+      { nome_produto: 'Elba Ramalho', total_vendas: 1 },
+      { nome_produto: 'Fogão', total_vendas: 1 },
+      { nome_produto: 'Engenheiros do Havaí', total_vendas: 1 },
+      { nome_produto: 'Five Finger Death Punch', total_vendas: 1 },
+      { nome_produto: 'Máquina de Chopp', total_vendas: 1 },
+      { nome_produto: 'Batedeira', total_vendas: 1 },
+      {nome_produto: 'Senhor dos Anéis - O Retorno do Rei', total_vendas: 1}
+    ]
+  }
+]
+
+
+```
+
+3. Qual é o valor médio das vendas por estado do cliente?
+
+### Query 3
+
+```javascript
+
+db.purchase.aggregate([
+    {
+        $group: {
+          _id : "$endereco.estado",
+          media_vendas: { $avg: "$produto.preco" }
+        }
+      }
+  ]);
+
+```
+
+### Retorno Query 3
+
+```javascript
+
+[
+    { _id: 'Acre', media_vendas: 310.31875 },
+    { _id: 'Bahia', media_vendas: 326.08 },
+    { _id: 'Curitiba', media_vendas: 145.575 },
+    { _id: 'Rio de Janeiro', media_vendas: 687.9599999999999 },
+    { _id: 'Sao Paulo', media_vendas: 145.575 }
+  ]
+
+```
+
+4. Quantos de cada tipo de produto foram vendidos nos últimos 30 dias?
+
+### Query 4 
+
+```javascript
+
+db.purchase.aggregate([
+    {
+        $match: {
+            dt_compra: { 
+                $gte: new Date(new Date().setDate(new Date().getDate() - 30)) // Filtra vendas nos últimos 30 dias
+            }
+        }
+    },
+    {
+        $group: {
+            _id: "$produto.categoria", // Agrupa por categoria de produto
+            total_vendas: { $sum: 1 }  // Conta o total de vendas por categoria
+        }
+    },
+    {
+        $sort: { total_vendas: -1 } // Ordena pela quantidade de vendas em ordem decrescente
+    }
+]);
+
+```
+
+>[!Tip]
+>Não funcionou rodando via Shell, caso tente rodar diretamente pela interface ou via node.
